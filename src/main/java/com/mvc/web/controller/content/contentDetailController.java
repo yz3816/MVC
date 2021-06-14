@@ -42,7 +42,7 @@ public class contentDetailController extends HttpServlet {
 
 		HttpSession session = req.getSession();
 		session.setAttribute("par", par);
-
+		
 		req.setAttribute("nt", nt);
 		req.setAttribute("f", field);
 		req.setAttribute("q", qurry);

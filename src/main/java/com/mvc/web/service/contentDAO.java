@@ -32,41 +32,74 @@ public class contentDAO {
 		int start = 1 + (page - 1) * 10;
 		int end = page * 10;
 		
+	
+		
+		String sql1=" select * , (select count(id) as count    "
+				+ "			  from tbl_board    "
+				+ "			 where (levenshtein(writeID, ?) <= 2)   "
+				+ "			   and useFlag ='Y'    "
+				+ "			   and board_id in (select board_id    "
+				+ "								 from user_auth    "
+				+ "								where rankcd= ?)) as count    "
+				+ "  from (select @rownum:=@rownum+1 as num ,n.*    "
+				+ "		  from( select *    "
+				+ "				  from tbl_board    "
+				+ "				where (levenshtein(writeID, ?) <= 2)   "
+				+ "				   and useFlag ='Y'    "
+				+ "				   and board_id in (select board_id    "
+				+ "									 from user_auth    "
+				+ "					                where rankcd=? )    "
+				+ "				order by regdate desc)n,    "
+				+ "		(SELECT @rownum:=0)low) num    "
+				+ " where num.num between ? and ?; ";		
 
-		String sql = "  select * ,  (select count(id) as count "
-				+ "			           from tbl_board "
-				+ "					  where "+field+" like ? "
-				+ "					    and useFlag ='Y' "
-				+ "								  and board_id in (select boardID  "
-				+ "													from user_auth  "
-				+ "												   where rankcd= ?)) as count "
-				+ "				    from (select @rownum:=@rownum+1 as num ,n.* "
-				+ "				            from( select * "
-				+ "					                from tbl_board "
-				+ "								   where "+field+" like ?  "
-				+ "									 and useFlag ='Y' "
-				+ "                                     and board_id in (select boardID  "
-				+ "													   from user_auth  "
-				+ "													   where rankcd=?) "
-				+ "					        order by regdate desc)n  "
-				+ "				            where (@rownum:=0)=0)num  "
-				+ "				   where num.num between ? and ? ;";
+		String sql2 =  "	select * ,  (select count(id) as count "
+		  		+ "	              from tbl_board "
+			    + "	           	where "+field+" like ? "
+				+ "	           	  and useFlag ='Y' "
+				+ "	           	  and board_id in (select boardID "
+				+ "	             				    from user_auth "
+				+ "	             			       where rankcd= ?)) as count "
+				+ "  from (select @rownum:=@rownum+1 as num ,n.* "
+				+ "          from( select * "
+				+ "	                 from tbl_board "
+				+ "				    where "+field+" like ? "
+				+ "					  and useFlag ='Y' "
+				+ "                   and board_id in (select boardID "
+				+ "									    from user_auth "
+				+ "									   where rankcd=? ) "
+				+ "	      			order by regdate desc)n, "
+				+ "		  (SELECT @rownum:=0)low) num "
+				+ "  where num.num between ? and ? "; // 조회 sql	
+		
 		List<Notice> list = new ArrayList<>(); // list 배열 생성
 		Notice ns = null;
 		
 		try {
-
 			con = Connection_Provider.getConnection();
-
-			psmt = con.prepareStatement(sql);
-			psmt.setString(1, "%" + qurry + "%");
-			psmt.setString(2, rank);
-			psmt.setString(3, "%" + qurry + "%");
-			psmt.setString(4, rank);
-			psmt.setInt(5, start);
-			psmt.setInt(6, end);
+			//field 검색조건이 타이틀일 경우 
+			
+			if(field.equals("title")) {
+				psmt = con.prepareStatement(sql2);
+				psmt.setString(1, "%" + qurry + "%");
+				psmt.setString(2, rank);
+				psmt.setString(3, "%" + qurry + "%");
+				psmt.setString(4, rank);
+				psmt.setInt(5, start);
+				psmt.setInt(6, end);
+				
+			}else if(field.equals("writeid")) {
+				psmt = con.prepareStatement(sql1);
+				psmt.setString(1, qurry);
+				psmt.setString(2, rank);
+				psmt.setString(3, qurry);
+				psmt.setString(4, rank);
+				psmt.setInt(5, start);
+				psmt.setInt(6, end);
+				
+			}	
+			
 			rs = psmt.executeQuery();
-
 			while (rs.next()) {
 				int id1 = rs.getInt("id");
 				String board_id = rs.getString("board_id");
@@ -94,7 +127,8 @@ public class contentDAO {
 			JdbcUtil.close(psmt);
 			JdbcUtil.close(rs);
 
-		}
+		}		
+
 		System.out.println("dao : " + count);
 		etcList el = new etcList(count, list);
 
@@ -299,5 +333,6 @@ public class contentDAO {
 
 		return list;
 	}
+
 
 }

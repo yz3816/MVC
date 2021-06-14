@@ -13,8 +13,8 @@ public class Connection_Provider {
 		Connection conn = null;
 
 		try {
-			String url = "jdbc:mysql://localhost:3306/study?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
-			String id = "root";
+			String url = "jdbc:mysql://13.209.93.112:3306/Project";
+			String id = "putty";
 			String pass = "1234";
 			String driver = "com.mysql.jdbc.Driver";
 			Class.forName(driver);

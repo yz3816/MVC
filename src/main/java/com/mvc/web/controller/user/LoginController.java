@@ -38,6 +38,16 @@ public class LoginController extends HttpServlet {
 		User ur = (userDAO.getInstance().logincheck(lg));
 
 		int result = ur.getNumber();
+		
+		// 클라이언트 ip 추출
+		String userIP = req.getHeader("X-Forwarded-For");
+		if(userIP==null) {
+			userIP=req.getRemoteAddr();
+		}
+		
+		// 접속한 인원 테이블에 접속자 정보 입력
+		
+		userDAO.getInstance().setLoginInfo(pid,userIP);
 
 		switch (result) {
 		case 1:

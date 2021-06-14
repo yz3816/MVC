@@ -99,9 +99,7 @@ public class userDAO {
 			pstmt.setString(1, rt.getId());
 			pstmt.setString(2, rt.getPass());
 			pstmt.setString(3, rt.getName());
-			pstmt.setString(4, rt.getEmail());
-
-			System.out.println("pstmt aaaaaaaaa: " + pstmt);
+			pstmt.setString(4, rt.getEmail());			
 
 			result = pstmt.executeUpdate();
 
@@ -110,6 +108,29 @@ public class userDAO {
 		}
 
 		return result;
+	}
+
+	public void setLoginInfo(String pid, String userIP) {
+		
+
+		String sql = "insert into user_swap(userID,userIP,outtime,division) values(?,?,?,?)";
+		int result = 0;
+		
+		try {
+
+			Connection conn = Connection_Provider.getConnection();
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, pid);
+			pstmt.setString(2, userIP);
+			pstmt.setString(3, null);
+			pstmt.setString(4, "i");			
+
+			result = pstmt.executeUpdate();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}	
+		
 	}
 
 }

@@ -53,10 +53,9 @@ public class contentListController extends HttpServlet {
 		// req.setAttribute("count", count);
 
 		etcList el = contentDAO.getInstance().getList(page, field, qurry, userRank);
-		System.out.println("userrank" + userRank);
 		List<Notice> list = el.getNs();
 		int count = el.getCount();
-		System.out.println("content : 1111 " + count);
+
 
 		req.setAttribute("name", userNm);
 		req.setAttribute("list", list);
