@@ -12,7 +12,7 @@ import com.mvc.web.entity.content.Notice;
 import com.mvc.web.entity.content.Picture;
 import com.mvc.web.entity.content.etcList;
 
-public class contentDAO {
+public class contentDAO{
 
 	private static contentDAO instance = new contentDAO(); // 페이지 실행되자마자 객체 하나를 생성하고 새 객체를 생성하는게 아니라 한번 생성된 얘만 계속옴
 
@@ -27,78 +27,61 @@ public class contentDAO {
 		Connection con = null;
 		PreparedStatement psmt = null;
 		ResultSet rs = null;
-		
-		int count=0;
-		int start = 1 + (page - 1) * 10;
-		int end = page * 10;
-		
-	
-		
-		String sql1=" select * , (select count(id) as count    "
-				+ "			  from tbl_board    "
-				+ "			 where (levenshtein(writeID, ?) <= 2)   "
-				+ "			   and useFlag ='Y'    "
-				+ "			   and board_id in (select board_id    "
-				+ "								 from user_auth    "
-				+ "								where rankcd= ?)) as count    "
-				+ "  from (select @rownum:=@rownum+1 as num ,n.*    "
-				+ "		  from( select *    "
-				+ "				  from tbl_board    "
-				+ "				where (levenshtein(writeID, ?) <= 2)   "
-				+ "				   and useFlag ='Y'    "
-				+ "				   and board_id in (select board_id    "
-				+ "									 from user_auth    "
-				+ "					                where rankcd=? )    "
-				+ "				order by regdate desc)n,    "
-				+ "		(SELECT @rownum:=0)low) num    "
-				+ " where num.num between ? and ?; ";		
 
-		String sql2 =  "	select * ,  (select count(id) as count "
-		  		+ "	              from tbl_board "
-			    + "	           	where "+field+" like ? "
-				+ "	           	  and useFlag ='Y' "
-				+ "	           	  and board_id in (select boardID "
-				+ "	             				    from user_auth "
-				+ "	             			       where rankcd= ?)) as count "
-				+ "  from (select @rownum:=@rownum+1 as num ,n.* "
-				+ "          from( select * "
-				+ "	                 from tbl_board "
-				+ "				    where "+field+" like ? "
-				+ "					  and useFlag ='Y' "
-				+ "                   and board_id in (select boardID "
-				+ "									    from user_auth "
-				+ "									   where rankcd=? ) "
-				+ "	      			order by regdate desc)n, "
-				+ "		  (SELECT @rownum:=0)low) num "
-				+ "  where num.num between ? and ? "; // 조회 sql	
-		
+		int count = 0;
+		int start = 1 + (page - 1) * 10;
+
+		String sql1 = "		   select row.* , cnt.count" + "				 from(select * "
+				+ "						from tbl_board "
+				+ "                        where (levenshtein(writeID, ?) <= 2)"
+				+ "						   		and useFlag ='Y' "
+				+ "						   		and board_id in (select boardID "
+				+ "													 	  from user_auth "
+				+ "									                	 where rankcd= ?)"
+				+ "						order by regdate desc  limit 10 offset ?)row,"
+				+ "					 (select count(id) as count" + "						from tbl_board "
+				+ "					   where (levenshtein(writeID, ?) <= 2)"
+				+ "						 and useFlag ='Y' " + "						 and board_id in (select boardID "
+				+ "										   from user_auth "
+				+ "										  where rankcd= ?))cnt";
+
+		String sql2 = "	    select row.* , cnt.count as count" + "				 from(select * "
+				+ "						from tbl_board " + "					   where title like ?"
+				+ "						 and useFlag ='Y' " + "						 and board_id in (select boardID "
+				+ "										   from user_auth "
+				+ "										  where rankcd=? ) "
+				+ "						order by regdate desc  limit 10 offset ?)row,"
+				+ "					 (select count(id) as count" + "						from tbl_board "
+				+ "					   where title like ?" + "						 and useFlag ='Y' "
+				+ "						 and board_id in (select boardID "
+				+ "										   from user_auth "
+				+ "										  where rankcd=? ))cnt "; // 조회 sql
+
 		List<Notice> list = new ArrayList<>(); // list 배열 생성
 		Notice ns = null;
-		
+
 		try {
 			con = Connection_Provider.getConnection();
-			//field 검색조건이 타이틀일 경우 
-			
-			if(field.equals("title")) {
+			// field 검색조건이 타이틀일 경우
+
+			if (field.equals("title")) {
 				psmt = con.prepareStatement(sql2);
 				psmt.setString(1, "%" + qurry + "%");
 				psmt.setString(2, rank);
-				psmt.setString(3, "%" + qurry + "%");
-				psmt.setString(4, rank);
-				psmt.setInt(5, start);
-				psmt.setInt(6, end);
-				
-			}else if(field.equals("writeid")) {
+				psmt.setInt(3, start);
+				psmt.setString(4, "%" + qurry + "%");
+				psmt.setString(5, rank);
+
+			} else if (field.equals("writeid")) {
 				psmt = con.prepareStatement(sql1);
 				psmt.setString(1, qurry);
 				psmt.setString(2, rank);
-				psmt.setString(3, qurry);
-				psmt.setString(4, rank);
-				psmt.setInt(5, start);
-				psmt.setInt(6, end);
-				
-			}	
-			
+				psmt.setInt(3, start);
+				psmt.setString(4, qurry);
+				psmt.setString(5, rank);
+
+			}
+
 			rs = psmt.executeQuery();
 			while (rs.next()) {
 				int id1 = rs.getInt("id");
@@ -108,8 +91,8 @@ public class contentDAO {
 				String content = rs.getString("content");
 				Date regdate = rs.getTimestamp("regdate");
 				int hit = rs.getInt("hit");
-				count = rs.getInt("count");	
-				
+				count = rs.getInt("count");
+
 				System.out.println("카운트 " + count);
 
 				// 조회 된 값을 입력하여 초기화하는 생성자 생성
@@ -127,7 +110,7 @@ public class contentDAO {
 			JdbcUtil.close(psmt);
 			JdbcUtil.close(rs);
 
-		}		
+		}
 
 		System.out.println("dao : " + count);
 		etcList el = new etcList(count, list);
@@ -138,11 +121,8 @@ public class contentDAO {
 	public Notice getDetail(int no) {
 
 		String sql = " SELECT tb.id, bm.board_name, tb.title, tb.writeid, tb.content, tb.regdate, tb.hit "
-				+ "      FROM tbl_board tb, "
-				+ "	          board_master bm "
-				+ "     WHERE bm.board_id = tb.board_id "
-				+ "       AND tb.useFlag = 'Y' "
-				+ "       AND tb.id = ?  ";
+				+ "      FROM tbl_board tb, " + "	          board_master bm "
+				+ "     WHERE bm.board_id = tb.board_id " + "       AND tb.useFlag = 'Y' " + "       AND tb.id = ?  ";
 		Notice ns = null;
 
 		try {
@@ -163,7 +143,7 @@ public class contentDAO {
 				int hit = rs.getInt("hit");
 
 				// 조회 된 값을 입력하여 초기화하는 생성자 생성
-				ns = new Notice(board,id1, title, writeid, content, regdate, hit);
+				ns = new Notice(board, id1, title, writeid, content, regdate, hit);
 				// list 에 조회된 값이 저장된 notice 객체 추가
 
 			}
@@ -264,7 +244,7 @@ public class contentDAO {
 
 	}
 
-	public void Uphit(int id) {		
+	public void Uphit(int id) {
 
 		String sql = "update tbl_board set hit=hit+1 where id = ?";
 		Connection conn = null;
@@ -273,7 +253,7 @@ public class contentDAO {
 		try {
 
 			conn = Connection_Provider.getConnection();
-			pstmt = conn.prepareStatement(sql);			
+			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, id);
 
 			pstmt.executeUpdate();
@@ -288,12 +268,11 @@ public class contentDAO {
 			JdbcUtil.close(pstmt);
 
 		}
-		
-		
+
 	}
 
 	public List<Picture> getPictureList() {
-		
+
 		List<Picture> list = new ArrayList<>();
 		String sql = "select * from tbl_picture";
 		Connection conn = null;
@@ -302,21 +281,21 @@ public class contentDAO {
 		try {
 
 			conn = Connection_Provider.getConnection();
-			pstmt = conn.prepareStatement(sql);						
+			pstmt = conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
-			
-			while(rs.next()) {
-				
+
+			while (rs.next()) {
+
 				int id = rs.getInt("id");
 				String ptitle = rs.getString("ptitle");
 				String writeid = rs.getString("writeid");
 				String path = rs.getString("path");
 				Date date = rs.getTimestamp("regdate");
 				String useFlag = rs.getString("useFlag");
-				
-				Picture pt = new Picture(id,ptitle,writeid,path,date,useFlag);
+
+				Picture pt = new Picture(id, ptitle, writeid, path, date, useFlag);
 				list.add(pt);
-				
+
 			}
 
 		} catch (Exception e) {
@@ -334,5 +313,63 @@ public class contentDAO {
 		return list;
 	}
 
+	public etcList getAllContentList(int page, String qurry, String userRank) {
+		int start = (page - 1) * 10;
+
+		String sql = "select row.*, cnt.count" + "	from(select *" + "		   from tbl_board"
+				+ "	      where useFlag ='Y' "
+				+ "            and match(title, writeid, content)  against(? in boolean mode)"
+				+ "		    and board_id in (select boardID " + "							 from user_auth "
+				+ "							where rankcd= ?) " + "		 order by regdate desc  limit 10 offset ?)row,"
+				+ "         (select count(id) as count" + "		    from tbl_board" + "	       where useFlag ='Y' "
+				+ "             and match(title, writeid, content)  against(? in boolean mode)"
+				+ "		     and board_id in (select boardID " + "                            from user_auth "
+				+ "						      where rankcd= ?))cnt";
+
+		int count = 0;
+
+		List<Notice> list = new ArrayList<>(); // list 배열 생성
+		Notice ns = null;
+
+		try {
+			Connection conn = Connection_Provider.getConnection();
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+
+			pstmt.setString(1, qurry);
+			pstmt.setString(2, userRank);
+			pstmt.setInt(3, start);
+			pstmt.setString(4, qurry);
+			pstmt.setString(5, userRank);
+
+			ResultSet rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+
+				int id1 = rs.getInt("id");
+				String board_id = rs.getString("board_id");
+				String title = rs.getString("title");
+				String writeid = rs.getString("writeid");
+				String content = rs.getString("content");
+				Date regdate = rs.getTimestamp("regdate");
+				int hit = rs.getInt("hit");
+				count = rs.getInt("count");
+
+				ns = new Notice(id1, title, writeid, content, regdate, hit);
+				list.add(ns);
+
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		etcList el = new etcList(count, list);
+
+		return el;
+	}
+
 
 }
+	
+
+

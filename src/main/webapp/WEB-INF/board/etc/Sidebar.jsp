@@ -33,21 +33,63 @@
 				<div class="position-sticky pt-3">
 					<ul class="nav flex-column">
 						<li class="nav-item"><a class="nav-link active"
-							aria-current="page" href="#"> <span data-feather="home"></span>
-								Dashboard
+							aria-current="page" href="/board/content/list"> <span data-feather="home"></span>
+								contentlist
 						</a></li>
-						<li class="nav-item"><a class="nav-link" href="#"> <span
-								data-feather="file"></span> Orders
+					<c:if test="${sessionScope.userRank=='A'}">
+						<li class="nav-item"><a class="nav-link" href="/board/content/soccerlist"> <span
+								data-feather="file"></span> Soccer
 						</a></li>
-						<li class="nav-item"><a class="nav-link" href="#"> <span
-								data-feather="shopping-cart"></span> Products
+						<li class="nav-item"><a class="nav-link" href="/board/content/baseballlist"> <span
+								data-feather="shopping-cart"></span> Baseball
+						</a></li>	
+						
+						<li class="nav-item"><a class="nav-link" href="/board/content/volleyballlist"> <span
+								data-feather="users"></span> Volleyball
 						</a></li>
-						<li class="nav-item"><a class="nav-link" href="#"> <span
-								data-feather="users"></span> Customers
+						<li class="nav-item"><a class="nav-link" href="/board/content/humorlist"> <span
+								data-feather="bar-chart-2"></span> Humor
 						</a></li>
-						<li class="nav-item"><a class="nav-link" href="#"> <span
-								data-feather="bar-chart-2"></span> Reports
+					
+					</c:if>
+					<c:if test="${sessionScope.userRank!='A'}">
+						
+						<c:if test="${sessionScope.userRank=='U'}">
+								
+						<li class="nav-item"><a class="nav-link" href="/board/content/soccerlist"> <span
+								data-feather="file"></span> Soccer
 						</a></li>
+						
+						<li class="nav-item"><a class="nav-link" href="/board/content/volleyballlist"> <span
+								data-feather="users"></span> Volleyball
+						</a></li>
+						<li class="nav-item"><a class="nav-link" href="/board/content/humorlist"> <span
+								data-feather="bar-chart-2"></span> Humor
+						</a></li>	
+							
+							
+						</c:if>	
+						<c:if test="${sessionScope.userRank!='U'}">
+						
+							<c:if test="${sessionScope.userRank=='G'}">
+								<li class="nav-item"><a class="nav-link" href="/board/content/soccerlist"> <span
+										data-feather="file"></span> Soccer
+								</a></li>
+								
+								<li class="nav-item"><a class="nav-link" href="/board/content/volleyballlist"> <span
+										data-feather="users"></span> Volleyball
+								</a></li>						
+							
+							</c:if>	
+											<c:if test="${sessionScope.userRank!='G'}">
+											</c:if>	
+							
+						</c:if>	
+							
+						
+					</c:if>
+					
+						
 						<li class="nav-item"><a class="nav-link" href="#"> <span
 								data-feather="layers"></span> Integrations
 						</a></li>

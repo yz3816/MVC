@@ -25,15 +25,12 @@ public class LoginController extends HttpServlet {
 
 		req.setCharacterEncoding("utf-8");
 		resp.setContentType("text/html; charset=UTF-8");
-
+		
 		String pid = req.getParameter("id");
-		System.err.println(" 1111 : " + pid);
 		String ppass = req.getParameter("pass");
 		String remember = req.getParameter("remember");
 
 		Login lg = new Login(pid, ppass);
-
-		System.out.println("login remember : " + remember);
 
 		User ur = (userDAO.getInstance().logincheck(lg));
 

@@ -6,8 +6,6 @@ public class etcList {
 
 	private int count;
 	private List<Notice> ns;
-	
-	
 
 	public int getCount() {
 		return count;
